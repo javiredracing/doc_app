@@ -13,7 +13,7 @@ filters = {
 }
 
 #@st.cache_data(show_spinner=False)
-def upload_file(uploaded_files, metadata, force_update, parse_doc):
+def upload_file(uploaded_files, metadata):
     #payload== {"metadata": metadata}
     payload = {"metadata": [{}]}
     if len(uploaded_files) > 0:
@@ -26,8 +26,8 @@ def upload_file(uploaded_files, metadata, force_update, parse_doc):
             files=multiple_files, 
             #headers={"Content-Type": "multipart/form-data", "accept": "application/json"},
             headers={"accept": "application/json"},
-            data=payload,
-            params = {"force_update":force_update, "parse_doc":parse_doc})
+            data=payload)#,
+            #params = {"force_update":force_update, "parse_doc":parse_doc})
             #force_update=force_update, parse_doc=parse_doc, header=header,footer=footer)
         return response.json()
         
@@ -75,9 +75,9 @@ st.header(':file_folder: Manage documents')
 
 with st.form("my_form", clear_on_submit=True):   
     selected_files = st.file_uploader("**Choose documents to upload:**", accept_multiple_files=True, type=["pdf", "xps", "epub", "mobi", "fb2", "cbz", "svg","txt", "docx"])
-    col1, col2 = st.columns(2,gap="large")
-    force = col1.checkbox('Force update',value=True, help="Update current document if exists")
-    parse = col2.checkbox('Parse document', value=True, help="Parse documents in paragraphs '\\n'")
+    #col1, col2 = st.columns(2,gap="large")
+    #force = col1.checkbox('Force update',value=True, help="Update current document if exists")
+    #parse = col2.checkbox('Parse document', value=True, help="Parse documents in paragraphs '\\n'")
     submitted = st.form_submit_button("Upload file(s)",type="primary")
 
 selection = []
@@ -109,9 +109,9 @@ if remove:
 if submitted:
     with st.spinner(text='Uploading files...'):
         if len(selected_files) > 0:
-            response = upload_file(selected_files, "",force, parse)
+            response = upload_file(selected_files, "")
             show_files_uploaded(response)
-            st.write("Force update", force, "Parse document", parse)
+            #st.write("Force update", force, "Parse document", parse)
         else:
             st.write("No files selected")
 
