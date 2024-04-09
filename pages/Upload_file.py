@@ -2,7 +2,7 @@ import streamlit as st
 import json
 import requests
 
-DOMAIN = "http://localhost:8000/"
+DOMAIN = "http://192.168.53.58:8000/"
 DOMAIN_UPLOAD = DOMAIN + "documents/upload/"
 DOMAIN_FILENAMES = DOMAIN + "documents/name_list/"
 DOMAIN_DELETE = DOMAIN + "documents/delete/"
@@ -98,7 +98,9 @@ if remove:
             if item[0]:
                to_remove.append(item[1])
         if len(to_remove) > 0: 
-            filters["filters"]["name"] = to_remove
+            filters["filters"]["field"]="meta.name"
+            filters["filters"]["operator"]="in"
+            filters["filters"]["value"]=to_remove
             result = exec_func(filters, DOMAIN_DELETE)
             if result:
                 st.success('Documents removed!', icon="✅")

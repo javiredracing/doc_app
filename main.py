@@ -5,7 +5,7 @@ from annotated_text import annotated_text
 from st_pages import Page, Section, add_page_title, show_pages
 
 
-DOMAIN = "http://localhost:8000/"
+DOMAIN = "http://192.168.53.58:8000/"
 DOMAIN_ASK = DOMAIN + "ask/"
 DOMAIN_SEARCH = DOMAIN + "search/"
 DOMAIN_FILENAMES = DOMAIN + "documents/name_list/"
@@ -108,7 +108,9 @@ def launchSearch(question, selection, params):
         if question and len(question) > 1 and len(selection) > 0:
             params["params"]["query"]=question
             params["params"]["top_k"]= nr_of_retrievers
-            params["params"]["filters"]["name"]=selection
+            params["params"]["filters"]["field"]="meta.name"
+            params["params"]["filters"]["operator"]="in"
+            params["params"]["filters"]["value"]=selection
             params["params"]["context_size"]= context_size
             results = get_answers(params, DOMAIN_SEARCH)
             showDocs(results)
@@ -121,8 +123,11 @@ def launchAsk(question, selection, params):
             params["params"]["query"]=question
             params["params"]["top_k"]= nr_of_retrievers
             params["params"]["top_k_answers"]= nr_of_answers
-            params["params"]["filters"]["name"]=selection
+            params["params"]["filters"]["field"]="meta.name"
+            params["params"]["filters"]["operator"]="in"
+            params["params"]["filters"]["value"]=selection
             params["params"]["context_size"]= context_size
+            #print(params)
             results = get_answers(params, DOMAIN_ASK)
             showAnswer(results)
         else:
