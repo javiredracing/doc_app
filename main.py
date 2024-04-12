@@ -32,7 +32,7 @@ st.set_page_config(
     initial_sidebar_state="auto",
 
 )
-@st.cache_data(show_spinner=False)
+#@st.cache_data(show_spinner=False)
 def get_answers(params, url):
     data = json.dumps(params)
     response = requests.post(url, data=data,
@@ -52,15 +52,29 @@ def annotate_context(answer, context):
 def showFooter(result):
     document_name = result['name']
     relevance_pct = round(result['score']*100,2)
-    page=result['page']
+    
     #'**Relevance:** ', relevance_pct , '**Source:** ' , document_name, '**Page:** ',page
     color=f":green[{relevance_pct}]"
     if relevance_pct < 85 and relevance_pct > 51:
         color=f":orange[{relevance_pct}]"
     elif relevance_pct < 51:
          color=f":red[{relevance_pct}]"
-    st.caption(f"**Relevance:** {color}%      **Source:** *{document_name}*      **Page:** {str(page)}")
+
+    caption = f"**Relevance:** {color}%      **Source:** *{document_name}*"
+    if "page" in result:
+        caption = caption + (f" **Page:** {str(result['page'])}")
+
+    st.caption(caption)
     st.divider()
+    
+def showHeader(result):
+    caption = ""
+    if "speaker" in result:
+        caption = caption + (f" **Speaker:** {str(result['speaker'])}")
+    if "start_time" in result and "end_time" in result:
+        caption = caption + (f" **Time:** {str(result['start_time'])} --> {str(result['end_time'])}")
+    if len(caption) > 0:
+        st.caption(caption)
     
 def showAnswer(results):
     if results:
@@ -68,6 +82,7 @@ def showAnswer(results):
          st.divider()
          for result in results:
             current_doc = result['document'][0]
+            showHeader(current_doc)
             if "before_context" in current_doc and (len(current_doc["before_context"]) > 0):
                with st.expander("..."):
                    for text in current_doc["before_context"]:
@@ -88,7 +103,8 @@ def showDocs(results):
     if len(results) > 0:
         st.subheader("Relevant paragraphs:")
         st.divider()
-        for result in results:              
+        for result in results:    
+            showHeader(result)
             if "before_context" in result  and (len(result["before_context"]) > 0):
                 with st.expander("..."):
                     for text in result["before_context"]:

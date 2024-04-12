@@ -74,7 +74,7 @@ st.set_page_config(
 st.header(':file_folder: Manage documents')
 
 with st.form("my_form", clear_on_submit=True):   
-    selected_files = st.file_uploader("**Choose documents to upload:**", accept_multiple_files=True, type=["pdf", "xps", "epub", "mobi", "fb2", "cbz", "svg","txt", "docx"])
+    selected_files = st.file_uploader("**Choose documents to upload:**", accept_multiple_files=True, type=["pdf", "xps", "epub", "mobi", "fb2", "cbz", "svg","txt", "docx","mp3"])
     #col1, col2 = st.columns(2,gap="large")
     #force = col1.checkbox('Force update',value=True, help="Update current document if exists")
     #parse = col2.checkbox('Parse document', value=True, help="Parse documents in paragraphs '\\n'")
