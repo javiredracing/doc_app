@@ -78,22 +78,23 @@ def showHeader(result):
     
 def showAnswer(results):
     if results:
-         st.subheader("Answers:")
-         st.divider()
-         for result in results:
-            current_doc = result['document'][0]
-            showHeader(current_doc)
-            if "before_context" in current_doc and (len(current_doc["before_context"]) > 0):
-               with st.expander("..."):
-                   for text in current_doc["before_context"]:
-                       st.markdown("*"+text+"*")
-            context = '*' + current_doc["content"] + '*'            
-            annotate_context(result["data"], context)
-            if "after_context" in current_doc  and (len(current_doc["after_context"]) > 0):
-                with st.expander("..."):
-                    for text in current_doc["after_context"]:
-                        st.markdown("*"+text+"*")
-            showFooter(current_doc)
+         st.info(results['answer'])
+         # for result in results:
+            # current_doc = result['document']
+            # showHeader(current_doc)
+            # if "before_context" in current_doc and (len(current_doc["before_context"]) > 0):
+               # with st.expander("..."):
+                   # for text in current_doc["before_context"]:
+                       # st.markdown("*"+text+"*")
+            # context = '*' + current_doc["content"] + '*'            
+            # #annotate_context(result["data"], context)
+            # st.markdown("*"+result['content']+"*")
+            # if "after_context" in current_doc  and (len(current_doc["after_context"]) > 0):
+                # with st.expander("..."):
+                    # for text in current_doc["after_context"]:
+                        # st.markdown("*"+text+"*")
+            # showFooter(current_doc)
+         showDocs(results['document'])
     else:
          st.subheader('REST API JSON response')
          st.write(results)
@@ -101,7 +102,7 @@ def showAnswer(results):
                 
 def showDocs(results):
     if len(results) > 0:
-        st.subheader("Relevant paragraphs:")
+        st.subheader("Sources:")
         st.divider()
         for result in results:    
             showHeader(result)
