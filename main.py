@@ -5,6 +5,7 @@ from annotated_text import annotated_text
 from st_pages import Page, Section, add_page_title, show_pages
 
 
+
 DOMAIN = "http://192.168.53.58:8000/"
 DOMAIN_ASK = DOMAIN + "ask/"
 DOMAIN_SEARCH = DOMAIN + "search/"
@@ -166,6 +167,7 @@ show_pages(
     [
         Page("main.py", "Search in documents", ":bookmark_tabs:"),
         Page("pages/Upload_file.py", "Manage documents", ":file_folder:"),
+        Page("pages/Chatbot.py", "Chatbot", ":robot_face:"),
     ]
 )
 #add_page_title()
