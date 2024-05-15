@@ -3,7 +3,7 @@ import json
 import requests
 from annotated_text import annotated_text
 from st_pages import Page, Section, add_page_title, show_pages
-
+from streamlit_ldap_authenticator import Authenticate
 
 
 DOMAIN = "http://192.168.53.58:8000/"
@@ -33,6 +33,9 @@ st.set_page_config(
     initial_sidebar_state="auto",
 
 )
+
+
+
 #@st.cache_data(show_spinner=False)
 def get_answers(params, url):
     data = json.dumps(params)
@@ -170,40 +173,48 @@ show_pages(
         Page("pages/Chatbot.py", "Chatbot", ":robot_face:"),
     ]
 )
-#add_page_title()
+    
+# Declare the authentication object
+auth = Authenticate(
+    st.secrets['ldap'],
+    st.secrets['session_state_names'],
+    st.secrets['auth_cookie']
+)
+
+user = auth.login()
+if user is not None:
+    auth.createLogoutForm({'message': f"{user['displayName']}"})
+    question=st.text_input(label="Ask me something and get an answer", placeholder="Query", value=None, max_chars=1500)
+
+    col1, col2 = st.columns(2, gap="large")
+    #col1.markdown("<style>.stButton button {width:100%;}</style>", unsafe_allow_html=True)
+    #col2.markdown("<style>.stButton button {width:100%;}</style>", unsafe_allow_html=True)
 
 
-question=st.text_input(label="Ask me something and get an answer", placeholder="Query", value=None, max_chars=1500)
+    with st.sidebar:
+        st.header('Options')
+        nr_of_retrievers = st.slider('Number of documents from retriever', min_value=1, max_value=10, value=5)
+        nr_of_answers = st.slider('Number of answers', min_value=1, max_value=5, value=2)
+        context_size = st.slider('Context paragraphs', min_value=0, max_value=20, value=0)
+        st.divider()
+        with st.spinner(text='Loading documents...'):
+            #myfilters = {"filters": {"user":st.session_state["user"]}}
+            documents_available = get_answers(filters, DOMAIN_FILENAMES)
+            selection = st.multiselect(
+                'Select documents',
+                documents_available, placeholder="Empty")
 
-col1, col2 = st.columns(2, gap="large")
-#col1.markdown("<style>.stButton button {width:100%;}</style>", unsafe_allow_html=True)
-#col2.markdown("<style>.stButton button {width:100%;}</style>", unsafe_allow_html=True)
+    if col1.button("Get information", use_container_width=True, type="primary"):
+        st.session_state.button = "search"
 
-
-with st.sidebar:
-    st.header('Options')
-    nr_of_retrievers = st.slider('Number of documents from retriever', min_value=1, max_value=10, value=5)
-    nr_of_answers = st.slider('Number of answers', min_value=1, max_value=5, value=2)
-    context_size = st.slider('Context paragraphs', min_value=0, max_value=20, value=0)
-    st.divider()
-    with st.spinner(text='Loading documents...'):
-        documents_available = get_answers(filters, DOMAIN_FILENAMES)
-        selection = st.multiselect(
-            'Select documents',
-            documents_available, placeholder="Empty")
-
-
-if col1.button("Get information", use_container_width=True, type="primary"):
-    st.session_state.button = "search"
-
-if col2.button("Get answers", use_container_width=True, type="primary"):
-    st.session_state.button = "ask"    
-        
-if 'button' in st.session_state:
-    if (question and len(question) > 1 and len(selection) > 0):
-        if st.session_state.button == "search":
-            launchSearch(question, selection, params)
-        elif st.session_state.button == "ask":
-            launchAsk(question, selection, params)
-    else:
-        st.info('Select documents and input query', icon="ℹ️")
+    if col2.button("Get answers", use_container_width=True, type="primary"):
+        st.session_state.button = "ask"    
+            
+    if 'button' in st.session_state:
+        if (question and len(question) > 1 and len(selection) > 0):
+            if st.session_state.button == "search":
+                launchSearch(question, selection, params)
+            elif st.session_state.button == "ask":
+                launchAsk(question, selection, params)
+        else:
+            st.info('Select documents and input query', icon="ℹ️")

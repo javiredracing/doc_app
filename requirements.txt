@@ -1,0 +1,6 @@
+streamlit
+st-pages=0.4.5
+st-annotated-text
+requests
+ollama
+streamlit-ldap-authenticator=0.2.6 
