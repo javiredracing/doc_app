@@ -35,6 +35,9 @@ st.set_page_config(
 )
 
 
+@st.experimental_dialog("Sign out")
+def logout_modal(user_name):
+    auth.createLogoutForm({'message': f"Autheticated as {user_name}"})
 
 #@st.cache_data(show_spinner=False)
 def get_answers(params, url):
@@ -183,7 +186,6 @@ auth = Authenticate(
 
 user = auth.login()
 if user is not None:
-    auth.createLogoutForm({'message': f"{user['displayName']}"})
     question=st.text_input(label="Ask me something and get an answer", placeholder="Query", value=None, max_chars=1500)
 
     col1, col2 = st.columns(2, gap="large")
@@ -203,6 +205,9 @@ if user is not None:
             selection = st.multiselect(
                 'Select documents',
                 documents_available, placeholder="Empty")
+        st.divider()        
+        if st.sidebar.button(":x: Sign out", type="secondary"):
+            logout_modal(st.session_state["login_user"]["displayName"])
 
     if col1.button("Get information", use_container_width=True, type="primary"):
         st.session_state.button = "search"

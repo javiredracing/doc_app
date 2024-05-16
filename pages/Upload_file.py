@@ -14,6 +14,10 @@ filters = {
     }
 }
 
+@st.experimental_dialog("Sign out")
+def logout_modal(user_name):
+    auth.createLogoutForm({'message': f"Authenticated as {user_name}"})
+    
 #@st.cache_data(show_spinner=False)
 def upload_file(uploaded_files, metadata):
     #payload== {"metadata": metadata}
@@ -83,9 +87,10 @@ auth = Authenticate(
 
 user = auth.login()
 if user is not None:
-
+    if st.sidebar.button(":x: Sign out", type="secondary"):
+        logout_modal(username)
     with st.form("my_form", clear_on_submit=True):   
-        selected_files = st.file_uploader("**Choose documents to upload:**", accept_multiple_files=True, type=["pdf", "xps", "epub", "mobi", "fb2", "cbz", "svg","txt", "docx","mp3"])
+        selected_files = st.file_uploader("**Choose documents to upload:**", accept_multiple_files=True, type=["pdf", "xps", "epub", "mobi", "fb2", "cbz", "svg","txt", "docx"])
         #col1, col2 = st.columns(2,gap="large")
         #force = col1.checkbox('Force update',value=True, help="Update current document if exists")
         #parse = col2.checkbox('Parse document', value=True, help="Parse documents in paragraphs '\\n'")

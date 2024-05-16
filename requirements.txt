@@ -1,5 +1,5 @@
 streamlit
-st-pages=0.4.5
+st-pages=0.4.1
 st-annotated-text
 requests
 ollama

@@ -79,14 +79,22 @@ def print_chat_history_timeline(chat_history_key):
         
 
 # -- helpers --
-
-
+@st.experimental_dialog("Sign out")
+def logout_modal(user_name):
+    auth.createLogoutForm({'message': f"Autheticated as {user_name}"})
 
 def assert_models_installed():
     if len(OLLAMA_MODELS) < 1:
         st.sidebar.warning("No models found. Please install at least one model e.g. `ollama run llama2`")
         st.stop()
 
+@st.experimental_dialog("Model info")
+def model_info(llm_name):
+    llm_details = [model for model in OLLAMA_MODELS if model["name"] == llm_name][0]
+    # convert size in llm_details from bytes to GB (human-friendly display)
+    if type(llm_details["size"]) != str:
+        llm_details["size"] = f"{round(llm_details['size'] / 1e9, 2)} GB"
+    st.write(llm_details)
 
 def select_model():
     
@@ -103,9 +111,9 @@ def select_model():
         llm_details["size"] = f"{round(llm_details['size'] / 1e9, 2)} GB"
 
     # display llm details
-    with st.expander("Model loaded: " + llm_name):
-        st.write(llm_details)
-
+    #with st.sidebar.expander("Model loaded: " + llm_name):
+    #    st.sidebar.write(llm_details)
+    
     return llm_name
 
 def select_params():
@@ -131,7 +139,7 @@ def save_conversation(llm_name, conversation_key, username):
 
     if st.session_state[conversation_key]:
 
-        if st.sidebar.button("Save conversation"):
+        if st.sidebar.button(":floppy_disk: Save conversation"):
             with open(f"{filename}.json", "w") as f:
                 json.dump(st.session_state[conversation_key], f, indent=4)
             st.success(f"Conversation saved to {filename}.json")
@@ -162,11 +170,16 @@ if __name__ == "__main__":
         st_ollama(llm_name, prompt, params, conversation_key)
         
         if st.session_state[conversation_key]:
-            clear_conversation = st.sidebar.button("Clear chat")
+            clear_conversation = st.sidebar.button(":wastebasket: Clear chat")
             if clear_conversation:
                 st.session_state[conversation_key] = []
                 st.session_state[conversation_key].append(system_promt)
                 st.rerun()
+        
 
         # save conversation to file
         save_conversation(llm_name, conversation_key, username)
+        if st.sidebar.button(":information_source: Model info", type="secondary"):
+            model_info(llm_name)
+        if st.sidebar.button(":x: Sign out", type="secondary"):
+            logout_modal(username)
