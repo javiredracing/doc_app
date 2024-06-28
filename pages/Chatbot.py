@@ -1,7 +1,6 @@
 import os
 import json
 import datetime
-from streamlit_ldap_authenticator import Authenticate
 import streamlit as st
 from ollama import Client
 client = Client(host='http://192.168.53.58:11434')
@@ -31,7 +30,6 @@ system_promt = {"role": "system", "content": "Te llamas IterIAno. Eres un compa�
 
 def st_ollama(model_name, user_question, params, chat_history_key):
 
-    
     if chat_history_key not in st.session_state.keys():
         st.session_state[chat_history_key] = []
         st.session_state[chat_history_key].append(system_promt)
@@ -79,10 +77,6 @@ def print_chat_history_timeline(chat_history_key):
         
 
 # -- helpers --
-@st.experimental_dialog("Sign out")
-def logout_modal(user_name):
-    auth.createLogoutForm({'message': f"Autheticated as {user_name}"})
-
 def assert_models_installed():
     if len(OLLAMA_MODELS) < 1:
         st.sidebar.warning("No models found. Please install at least one model e.g. `ollama run llama2`")
@@ -102,7 +96,8 @@ def select_model():
     
     #llm_name = st.sidebar.selectbox(f"Choose Agent (available {len(model_names)})", [""] + model_names)
     #if llm_name:
-    llm_name = OLLAMA_MODELS[0]["name"] 
+    #llm_name = OLLAMA_MODELS[0]["name"] 
+    llm_name = "llama3:8b-instruct-fp16"
         # llm details object
     llm_details = [model for model in OLLAMA_MODELS if model["name"] == llm_name][0]
 
@@ -141,45 +136,32 @@ def save_conversation(llm_name, conversation_key, username):
 
         if st.sidebar.button(":floppy_disk: Save conversation"):
             with open(f"{filename}.json", "w") as f:
-                json.dump(st.session_state[conversation_key], f, indent=4)
+                json.dump(st.session_state[conversation_key], f, indent=4,ensure_ascii=False)
             st.success(f"Conversation saved to {filename}.json")
 
+#st.set_page_config(layout="wide", page_title="ChatBot", page_icon="🦙")
+st.header(':robot_face: Chatbot')
 
-if __name__ == "__main__":
+llm_name = select_model()
+params = select_params()
+assert_models_installed()
 
-    st.set_page_config(layout="wide", page_title="ChatBot", page_icon="🦙")
-    st.header(':robot_face: Chatbot')
-    # Declare the authentication object
-    auth = Authenticate(
-        st.secrets['ldap'],
-        st.secrets['session_state_names'],
-        st.secrets['auth_cookie']
-    )
+if not llm_name: st.stop()
+username=st.session_state["login_user"]["displayName"]
+conversation_key = f"model_{llm_name}"
+prompt = st.chat_input(f"Ask a question ...")
 
-    user = auth.login()
-    if user is not None:
-        llm_name = select_model()
-        params = select_params()
-        assert_models_installed()
-        
-        if not llm_name: st.stop()
-        username=st.session_state["login_user"]["displayName"]
-        conversation_key = f"model_{llm_name}"
-        prompt = st.chat_input(f"Ask a question ...")
+st_ollama(llm_name, prompt, params, conversation_key)
 
-        st_ollama(llm_name, prompt, params, conversation_key)
-        
-        if st.session_state[conversation_key]:
-            clear_conversation = st.sidebar.button(":wastebasket: Clear chat")
-            if clear_conversation:
-                st.session_state[conversation_key] = []
-                st.session_state[conversation_key].append(system_promt)
-                st.rerun()
-        
+if st.session_state[conversation_key]:
+    clear_conversation = st.sidebar.button(":wastebasket: Clear chat")
+    if clear_conversation:
+        st.session_state[conversation_key] = []
+        st.session_state[conversation_key].append(system_promt)
+        st.rerun()
 
-        # save conversation to file
-        save_conversation(llm_name, conversation_key, username)
-        if st.sidebar.button(":information_source: Model info", type="secondary"):
-            model_info(llm_name)
-        if st.sidebar.button(":x: Sign out", type="secondary"):
-            logout_modal(username)
+
+# save conversation to file
+save_conversation(llm_name, conversation_key, username)
+if st.sidebar.button(":information_source: Model info", type="secondary"):
+    model_info(llm_name)

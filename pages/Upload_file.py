@@ -1,7 +1,6 @@
 import streamlit as st
 import json
 import requests
-from streamlit_ldap_authenticator import Authenticate
 
 DOMAIN = "http://192.168.53.58:8000/"
 DOMAIN_UPLOAD = DOMAIN + "documents/upload/"
@@ -14,9 +13,6 @@ filters = {
     }
 }
 
-@st.experimental_dialog("Sign out")
-def logout_modal(user_name):
-    auth.createLogoutForm({'message': f"Authenticated as {user_name}"})
     
 #@st.cache_data(show_spinner=False)
 def upload_file(uploaded_files, metadata):
@@ -36,7 +32,6 @@ def upload_file(uploaded_files, metadata):
             #params = {"force_update":force_update, "parse_doc":parse_doc})
             #force_update=force_update, parse_doc=parse_doc, header=header,footer=footer)
         return response.json()
-        
     else:
         return None
 
@@ -60,13 +55,13 @@ def show_files_uploaded(response):
     else:
         st.write("No files uploaded")
 
-st.set_page_config(
-    page_title="Semantic search tool",
-    page_icon=":bookmark_tabs:",
-    layout="centered",
-    initial_sidebar_state="auto",
+# st.set_page_config(
+    # page_title="Semantic search tool",
+    # page_icon=":bookmark_tabs:",
+    # layout="centered",
+    # initial_sidebar_state="auto",
 
-)        
+# )        
 
 # hide_st_style = """
             # <style>
@@ -78,60 +73,50 @@ st.set_page_config(
 # st.markdown(hide_st_style, unsafe_allow_html=True) 
         
 st.header(':file_folder: Manage documents')
-# Declare the authentication object
-auth = Authenticate(
-    st.secrets['ldap'],
-    st.secrets['session_state_names'],
-    st.secrets['auth_cookie']
-)
 
-user = auth.login()
-if user is not None:
-    if st.sidebar.button(":x: Sign out", type="secondary"):
-        logout_modal(username)
-    with st.form("my_form", clear_on_submit=True):   
-        selected_files = st.file_uploader("**Choose documents to upload:**", accept_multiple_files=True, type=["pdf", "xps", "epub", "mobi", "fb2", "cbz", "svg","txt", "docx"])
-        #col1, col2 = st.columns(2,gap="large")
-        #force = col1.checkbox('Force update',value=True, help="Update current document if exists")
-        #parse = col2.checkbox('Parse document', value=True, help="Parse documents in paragraphs '\\n'")
-        submitted = st.form_submit_button("Upload file(s)",type="primary")
+with st.form("my_form", clear_on_submit=True):   
+    selected_files = st.file_uploader("**Choose documents to upload:**", accept_multiple_files=True, type=["pdf", "xps", "epub", "mobi", "fb2", "cbz", "svg","txt", "docx"])
+    #col1, col2 = st.columns(2,gap="large")
+    #force = col1.checkbox('Force update',value=True, help="Update current document if exists")
+    #parse = col2.checkbox('Parse document', value=True, help="Parse documents in paragraphs '\\n'")
+    submitted = st.form_submit_button("Upload file(s)",type="primary")
 
-    selection = []
+selection = []
 
-    with st.form("form_del",clear_on_submit=True):       
-        st.write("**Select documents to remove:**")
-        with st.spinner(text='Loading documents...'):
-            documents_available = exec_func(filters, DOMAIN_FILENAMES)
-            for doc in documents_available:
-                selection.append((st.checkbox(doc), doc))
-        
-        remove = st.form_submit_button("Remove document(s)",type="primary")
+with st.form("form_del",clear_on_submit=True):       
+    st.write("**Select documents to remove:**")
+    with st.spinner(text='Loading documents...'):
+        documents_available = exec_func(filters, DOMAIN_FILENAMES)
+        for doc in documents_available:
+            selection.append((st.checkbox(doc), doc))
+    
+    remove = st.form_submit_button("Remove document(s)",type="primary")
 
-    if remove:
-        with st.spinner(text='Removing documents...'):
-            to_remove=[]
-            for item in selection:
-                if item[0]:
-                   to_remove.append(item[1])
-            if len(to_remove) > 0: 
-                filters["filters"]["field"]="meta.name"
-                filters["filters"]["operator"]="in"
-                filters["filters"]["value"]=to_remove
-                result = exec_func(filters, DOMAIN_DELETE)
-                if result:
-                    st.success('Documents removed!', icon="✅")
-                    #time.wait(2)
-                    st.cache_data.clear()
-                    #st.rerun()
+if remove:
+    with st.spinner(text='Removing documents...'):
+        to_remove=[]
+        for item in selection:
+            if item[0]:
+               to_remove.append(item[1])
+        if len(to_remove) > 0: 
+            filters["filters"]["field"]="meta.name"
+            filters["filters"]["operator"]="in"
+            filters["filters"]["value"]=to_remove
+            result = exec_func(filters, DOMAIN_DELETE)
+            if result:
+                st.success('Documents removed!', icon="✅")
+                #time.wait(2)
+                st.cache_data.clear()
+                #st.rerun()
 
-    if submitted:
-        with st.spinner(text='Uploading files...'):
-            if len(selected_files) > 0:
-                response = upload_file(selected_files, "")
-                show_files_uploaded(response)
-                #st.write("Force update", force, "Parse document", parse)
-            else:
-                st.write("No files selected")
+if submitted:
+    with st.spinner(text='Uploading files...'):
+        if len(selected_files) > 0:
+            response = upload_file(selected_files, "")
+            show_files_uploaded(response)
+            #st.write("Force update", force, "Parse document", parse)
+        else:
+            st.write("No files selected")
 
     # buttons = []   
     # for i in range(5):
