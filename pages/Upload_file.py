@@ -35,7 +35,7 @@ def upload_file(uploaded_files, metadata):
     else:
         return None
 
-@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False, ttl="1min")
 def exec_func(params, url):
     data = json.dumps(params)
     response = requests.post(url, data=data,
@@ -46,6 +46,8 @@ def exec_func(params, url):
     )
     return response.json()
     
+
+    
 def show_files_uploaded(response):
     if response["message"]:
         st.write(response["message"])
@@ -55,27 +57,10 @@ def show_files_uploaded(response):
     else:
         st.write("No files uploaded")
 
-# st.set_page_config(
-    # page_title="Semantic search tool",
-    # page_icon=":bookmark_tabs:",
-    # layout="centered",
-    # initial_sidebar_state="auto",
-
-# )        
-
-# hide_st_style = """
-            # <style>
-            # #MainMenu {visibility: hidden;}
-            # footer {visibility: hidden;}
-            # header {visibility: hidden;}
-            # </style>
-            # """
-# st.markdown(hide_st_style, unsafe_allow_html=True) 
-        
 st.header(':file_folder: Manage documents')
 
 with st.form("my_form", clear_on_submit=True):   
-    selected_files = st.file_uploader("**Choose documents to upload:**", accept_multiple_files=True, type=["pdf", "xps", "epub", "mobi", "fb2", "cbz", "svg","txt", "docx"])
+    selected_files = st.file_uploader("**Choose documents to upload:**", accept_multiple_files=True, type=["pdf", "xps", "epub", "mobi", "fb2", "cbz", "svg","txt", "docx", "srt"])
     #col1, col2 = st.columns(2,gap="large")
     #force = col1.checkbox('Force update',value=True, help="Update current document if exists")
     #parse = col2.checkbox('Parse document', value=True, help="Parse documents in paragraphs '\\n'")
@@ -114,7 +99,6 @@ if submitted:
         if len(selected_files) > 0:
             response = upload_file(selected_files, "")
             show_files_uploaded(response)
-            #st.write("Force update", force, "Parse document", parse)
         else:
             st.write("No files selected")
 

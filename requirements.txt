@@ -1,4 +1,4 @@
 streamlit
 requests
 ollama
-streamlit-ldap-authenticator=0.2.6 
+streamlit-ldap-authenticator==0.2.6 

@@ -1,0 +1,26 @@
+services:
+    nginx_proxy:
+        image: hub.iter.es/fichajes/nginx_reverse_proxy:0.1
+        container_name: nginx_proxy
+        restart: always
+        network_mode: host
+        command: ["bash", "-c", "service nginx start & tail -f /dev/null;"]
+        volumes:
+            - /opt/fichajes_app/nginx.conf:/etc/nginx/conf.d/default.conf
+            - /opt/fichajes_app/certs:/etc/certs
+        #ports:
+        #    - "443:443"
+
+    doc_app:
+        image: hub.iter.es/ia-client/doc_app:V0.1
+        restart: always
+        container_name: doc_app
+        volumes:
+            - /home/administrador/ia-projects/doc_app/llm_conversations:/app/llm_conversations
+        ports:
+            - "8501:8501"
+            
+    ollama-telegram:
+        image: hub.iter.es/ia-client/telegram_bot:V1.2
+        container_name: telegram_bot
+        restart: always

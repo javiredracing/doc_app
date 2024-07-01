@@ -1,7 +1,7 @@
 import streamlit as st
 import json
 import requests
-from annotated_text import annotated_text
+#from annotated_text import annotated_text
 
 DOMAIN = "http://192.168.53.58:8000/"
 DOMAIN_ASK = DOMAIN + "ask/"
@@ -23,16 +23,8 @@ params = {
     #"top_k_answers": 2
   }
 }
-# st.set_page_config(
-    # page_title="Semantic search tool",
-    # page_icon=":bookmark_tabs:",
-    # layout="wide",
-    # initial_sidebar_state="auto",
 
-# )
-
-
-#@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False)
 def get_answers(params, url):
     data = json.dumps(params)
     response = requests.post(url, data=data,
@@ -43,11 +35,21 @@ def get_answers(params, url):
     )
     return response.json()
 
+@st.cache_data(show_spinner=False,ttl="5min")
+def get_docs_available(params):
+    data = json.dumps(params)
+    response = requests.post(DOMAIN_FILENAMES, data=data,
+       headers={
+       "Content-Type": "application/json",
+       "accept": "application/json"
+       }
+    )
+    return response.json()
 
-def annotate_context(answer, context):
-    idx = context.find(answer)
-    idx_end = idx + len(answer)
-    annotated_text(context[:idx],(answer,"","#fcf3cf"),context[idx_end:],)
+# def annotate_context(answer, context):
+    # idx = context.find(answer)
+    # idx_end = idx + len(answer)
+    # annotated_text(context[:idx],(answer,"","#fcf3cf"),context[idx_end:],)
     
 def showFooter(result):
     document_name = result['name']
@@ -161,17 +163,17 @@ col1, col2 = st.columns(2, gap="large")
 
 
 with st.sidebar:
-    st.header('Options')
-    nr_of_retrievers = st.slider('Number of documents from retriever', min_value=1, max_value=10, value=5)
-    nr_of_answers = st.slider('Number of answers', min_value=1, max_value=5, value=2)
-    context_size = st.slider('Context paragraphs', min_value=0, max_value=20, value=0)
-    st.divider()
     with st.spinner(text='Loading documents...'):
         #myfilters = {"filters": {"user":st.session_state["user"]}}
-        documents_available = get_answers(filters, DOMAIN_FILENAMES)
+        documents_available = get_docs_available(filters)
         selection = st.multiselect(
             'Select documents',
             documents_available, placeholder="Empty")
+    st.divider()
+    nr_of_retrievers = st.slider('Number of documents from retriever', min_value=1, max_value=10, value=5)
+    nr_of_answers = st.slider('Number of answers', min_value=1, max_value=5, value=2)
+    context_size = st.slider('Context paragraphs', min_value=0, max_value=20, value=0)
+
 
 if col1.button("Get information", use_container_width=True, type="primary"):
     st.session_state.button = "search"
