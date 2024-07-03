@@ -59,7 +59,7 @@ class LdapAuthenticate:
         username_mod = f'uid={username},ou=users,dc=iter,dc=es'
         #conn = Connection(server, 'uid=jfernandez,ou=users,dc=iter,dc=es', password, auto_bind=False, auto_referrals=False, raise_exceptions=False)
         server = Server(self.config.server_path, use_ssl=self.config.use_ssl, get_info='ALL')
-        print("server",username_mod)
+        #print("server",username_mod)
         conn = Connection(server, username_mod, password, auto_bind=False, auto_referrals=False, raise_exceptions=False)
         try:
             conn.bind()

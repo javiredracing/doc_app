@@ -8,6 +8,8 @@ st.set_page_config(
     initial_sidebar_state="auto",
 )
 
+st.logo("https://www.iter.es/wp-content/uploads/2016/05/logo.png")
+
 auth = Authenticate(
     st.secrets['ldap'],
     st.secrets['session_state_names'],
@@ -15,18 +17,18 @@ auth = Authenticate(
 )
 
 #@st.experimental_dialog("Sign out")
-def logout_modal():
+def logout():
     user = st.session_state["login_user"]["displayName"]
-    auth.createLogoutForm({'message': f"Autheticated as {user}"})      
-    
-user = auth.login()
-    
+    auth.createLogoutForm({'message': f"Autheticated as {user}"})    
+
+user = auth.login()   
 # Declare the authentication object
+
 #if st.session_state["login_user"]["displayName"]:
 if user is not None:
-    semantic_search = st.Page("pages/Semantic_search.py", title="Search in documents", icon=":material/search:", default=True)
-    manage = st.Page("pages/Upload_file.py", title="Manage documents", icon=":material/dashboard:")
-    chatbot = st.Page("pages/Chatbot.py", title="Chatbot", icon="🤖")
-    logout_page = st.Page(logout_modal, title="Log out", icon=":material/logout:")
+    semantic_search = st.Page("page_menu/Semantic_search.py", title="Search in documents", icon=":material/search:", default=True)
+    manage = st.Page("page_menu/Upload_file.py", title="Manage documents", icon=":material/dashboard:")
+    chatbot = st.Page("page_menu/Chatbot.py", title="Chatbot", icon="🤖")
+    logout_page = st.Page(logout, title="Log out", icon=":material/logout:")
     pg = st.navigation([semantic_search, manage, chatbot, logout_page])
     pg.run()

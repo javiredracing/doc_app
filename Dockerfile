@@ -21,7 +21,7 @@ USER $WD_USER:$WD_GROUP
 
 RUN mkdir llm_conversations/
 COPY .streamlit/ .streamlit/
-COPY pages/ pages/
+COPY page_menu/ page_menu/
 COPY main.py .
 COPY requirements.txt .
 
