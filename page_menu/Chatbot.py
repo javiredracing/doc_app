@@ -97,7 +97,7 @@ def select_model():
     #llm_name = st.sidebar.selectbox(f"Choose Agent (available {len(model_names)})", [""] + model_names)
     #if llm_name:
     #llm_name = OLLAMA_MODELS[0]["name"] 
-    llm_name = "llama3:8b-instruct-fp16"
+    llm_name = "llama3.1:8b-instruct-fp16"
         # llm details object
     llm_details = [model for model in OLLAMA_MODELS if model["name"] == llm_name][0]
 
