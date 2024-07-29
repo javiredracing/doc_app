@@ -20,7 +20,6 @@ params = {
     },
     "query": " ",
     "top_k": 5
-    #"top_k_answers": 2
   }
 }
 
@@ -141,7 +140,6 @@ def launchAsk(question, selection, params):
         if question and len(question) > 1 and len(selection) > 0:
             params["params"]["query"]=question
             params["params"]["top_k"]= nr_of_retrievers
-            params["params"]["top_k_answers"]= nr_of_answers
             params["params"]["filters"]["field"]="meta.name"
             params["params"]["filters"]["operator"]="in"
             params["params"]["filters"]["value"]=selection
@@ -170,7 +168,6 @@ col1, col2 = st.columns(2, gap="large")
 
 with st.sidebar:
     nr_of_retrievers = st.slider('Number of documents from retriever', min_value=1, max_value=10, value=5)
-    nr_of_answers = st.slider('Number of answers', min_value=1, max_value=5, value=2)
     context_size = st.slider('Context paragraphs', min_value=0, max_value=20, value=0)
 
 if col1.button("Get information", use_container_width=True, type="primary"):
