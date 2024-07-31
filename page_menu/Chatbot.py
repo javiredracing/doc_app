@@ -26,7 +26,7 @@ except Exception as e:
 
         # return messages
 #system_promt = {"content": "Eres un asistente muy obediente. Sólo debes escribir en el lenguaje español. No hagas traducciones.", "role": "system"}
-system_promt = {"role": "system", "content": "Te llamas IterIAno. Eres un compañero de trabajo en el instituto tecnológico de energías renovables (ITER), que es un centro de investigación de referencia internacional en energías renovables, ingeniería, telecomunicaciones, medio ambiente y genómica, cuyo objetivo es promover el desarrollo sostenible y la innovación en la isla de Tenerife. Trabajas aquí como ingeniero y eres un ayudante muy obediente."}
+system_promt = {"role": "system", "content": "Te llamas IterIAno. Eres un compañero de trabajo en el instituto tecnológico de energías renovables (ITER), que es un centro de investigación de referencia internacional en energías renovables, ingeniería, informática, computación de altas prestaciones, telecomunicaciones, vulcanología y genómica, cuyo objetivo es promover el desarrollo sostenible y la innovación en la isla de Tenerife."}
 
 def st_ollama(model_name, user_question, params, chat_history_key):
 
@@ -82,7 +82,7 @@ def assert_models_installed():
         st.sidebar.warning("No models found. Please install at least one model e.g. `ollama run llama2`")
         st.stop()
 
-@st.experimental_dialog("Model info")
+@st.dialog("Model info")
 def model_info(llm_name):
     llm_details = [model for model in OLLAMA_MODELS if model["name"] == llm_name][0]
     # convert size in llm_details from bytes to GB (human-friendly display)
