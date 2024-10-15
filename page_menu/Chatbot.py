@@ -2,11 +2,19 @@ import os
 import json
 import datetime
 import streamlit as st
-from ollama import Client
-client = Client(host='http://192.168.53.58:11434')
+#from ollama import Client
+from openai import OpenAI
+#client = Client(host='http://192.168.53.58:11434')
+client = OpenAI(
+    base_url='http://192.168.53.58:11434/v1/',
+
+    # required but ignored
+    api_key='ollama',
+)
 
 try:
-    OLLAMA_MODELS = client.list()["models"]
+    #OLLAMA_MODELS = client.list()["models"]
+    OLLAMA_MODELS = client.models.list()
 except Exception as e:
     st.warning("Please make sure Ollama is installed first. See https://ollama.ai for more details.")
     st.stop()
@@ -45,9 +53,19 @@ def st_ollama(model_name, user_question, params, chat_history_key):
         messages = [dict(content=message["content"], role=message["role"]) for message in st.session_state[chat_history_key]]
 
         def llm_stream(response):
-            response = client.chat(model_name, messages, stream=True, options=params, keep_alive=-1)
-            for chunk in response:
-                yield chunk['message']['content']
+            #response = client.chat(model_name, messages, stream=True, options=params, keep_alive=-1)
+            chat_completion = client.chat.completions.create(
+                messages=messages,
+                model=model_name,
+                temperature=params["temperature"],
+                top_p=params["top_p"],
+                stream=True
+            )
+            if params["num_predict"] != -1:
+                chat_completion.max_completion_tokens = params["num_predict"]
+            for chunk in chat_completion:
+                #yield chunk['message']['content']
+                yield chunk.choices[0].delta.content
 
         st.divider()
         # streaming response
@@ -78,16 +96,16 @@ def print_chat_history_timeline(chat_history_key):
 
 # -- helpers --
 def assert_models_installed():
-    if len(OLLAMA_MODELS) < 1:
+    if len(OLLAMA_MODELS.data) < 1:
         st.sidebar.warning("No models found. Please install at least one model e.g. `ollama run llama2`")
         st.stop()
 
 @st.dialog("Model info")
 def model_info(llm_name):
-    llm_details = [model for model in OLLAMA_MODELS if model["name"] == llm_name][0]
+    llm_details = [model for model in OLLAMA_MODELS.data if model.id == llm_name][0]
     # convert size in llm_details from bytes to GB (human-friendly display)
-    if type(llm_details["size"]) != str:
-        llm_details["size"] = f"{round(llm_details['size'] / 1e9, 2)} GB"
+    #if type(llm_details["size"]) != str:
+    #    llm_details["size"] = f"{round(llm_details['size'] / 1e9, 2)} GB"
     st.write(llm_details)
 
 def select_model():
@@ -97,13 +115,15 @@ def select_model():
     #llm_name = st.sidebar.selectbox(f"Choose Agent (available {len(model_names)})", [""] + model_names)
     #if llm_name:
     #llm_name = OLLAMA_MODELS[0]["name"] 
-    llm_name = "llama3.1:8b-instruct-fp16"
+    #llm_name = "llama3.1:8b-instruct-fp16"
+    llm_name = "alpindale/Llama-3.2-11B-Vision-Instruct"
         # llm details object
-    llm_details = [model for model in OLLAMA_MODELS if model["name"] == llm_name][0]
+    #print(OLLAMA_MODELS.data[0].id)
+    llm_details = [model for model in OLLAMA_MODELS.data if model.id == llm_name][0]
 
     # convert size in llm_details from bytes to GB (human-friendly display)
-    if type(llm_details["size"]) != str:
-        llm_details["size"] = f"{round(llm_details['size'] / 1e9, 2)} GB"
+    #if type(llm_details["size"]) != str:
+    #    llm_details["size"] = f"{round(llm_details['size'] / 1e9, 2)} GB"
 
     # display llm details
     #with st.sidebar.expander("Model loaded: " + llm_name):

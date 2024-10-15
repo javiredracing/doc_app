@@ -1,4 +1,4 @@
 streamlit
 requests
-ollama
+openai
 streamlit-ldap-authenticator==0.2.6 
